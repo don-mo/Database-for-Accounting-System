@@ -19,6 +19,7 @@ export default function Home() {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
 
+  /* --- safer fetchData -------------------------------------------- */
   const fetchData = async () => {
     try {
       const [accountsRes, transactionsRes, summaryRes] = await Promise.all([
@@ -27,15 +28,27 @@ export default function Home() {
         fetch("/api/summary"),
       ])
 
-      const accountsData = await accountsRes.json()
-      const transactionsData = await transactionsRes.json()
-      const summaryData = await summaryRes.json()
+      // Bail early if any endpoint failed
+      if (!accountsRes.ok || !transactionsRes.ok || !summaryRes.ok) {
+        const bad = !accountsRes.ok ? "/api/accounts" : !transactionsRes.ok ? "/api/transactions" : "/api/summary"
+        throw new Error(
+          `${bad} returned ${!accountsRes.ok ? accountsRes.status : !transactionsRes.ok ? transactionsRes.status : summaryRes.status}`,
+        )
+      }
 
-      setAccounts(accountsData)
-      setTransactions(transactionsData)
-      setSummary(summaryData)
-    } catch (error) {
-      console.error("Error fetching data:", error)
+      // Only parse JSON for good responses
+      const [accountsData, transactionsData, summaryData] = await Promise.all([
+        accountsRes.json(),
+        transactionsRes.json(),
+        summaryRes.json(),
+      ])
+
+      setAccounts(Array.isArray(accountsData) ? accountsData : [])
+      setTransactions(Array.isArray(transactionsData) ? transactionsData : [])
+      setSummary(summaryData && typeof summaryData === "object" ? summaryData : blankSummary)
+    } catch (err) {
+      console.error("Error fetching data:", err)
+      alert(`Failed to load data. Check console & API logs.`)
     } finally {
       setLoading(false)
     }
