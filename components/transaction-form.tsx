@@ -67,7 +67,7 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
     }
   }
 
-  const cashAccounts = accounts.filter((a) => a.AccountType === "Bank")
+  const cashAndDebtAccounts = accounts.filter((a) => a.AccountType === "Bank" || a.AccountType === "Debt")
   const fundAccounts = accounts.filter((a) => a.AccountType === "Fund")
   const expenseAccounts = accounts.filter((a) => a.AccountType === "Expense")
 
@@ -180,7 +180,7 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="cash-income">Cash Account</Label>
+                <Label htmlFor="cash-income">Cash/Debt Account</Label>
                 <Select
                   value={formData.fromAccountId}
                   onValueChange={(value) => setFormData({ ...formData, fromAccountId: value })}
@@ -189,9 +189,10 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
                     <SelectValue placeholder="Where does the money go?" />
                   </SelectTrigger>
                   <SelectContent>
-                    {cashAccounts.map((account) => (
+                    {cashAndDebtAccounts.map((account) => (
                       <SelectItem key={account.AccountID} value={account.AccountID.toString()}>
-                        {account.Name} (${account.CurrentBalance})
+                        {account.Name} ($
+                        {account.AccountType === "Bank" ? account.CurrentBalance : account.CurrentBalance})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -253,7 +254,7 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="cash-expense">Cash Account</Label>
+                <Label htmlFor="cash-expense">Cash/Debt Account</Label>
                 <Select
                   value={formData.fromAccountId}
                   onValueChange={(value) => setFormData({ ...formData, fromAccountId: value })}
@@ -262,9 +263,10 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
                     <SelectValue placeholder="Where does money come from?" />
                   </SelectTrigger>
                   <SelectContent>
-                    {cashAccounts.map((account) => (
+                    {cashAndDebtAccounts.map((account) => (
                       <SelectItem key={account.AccountID} value={account.AccountID.toString()}>
-                        {account.Name} (${account.CurrentBalance})
+                        {account.Name} ($
+                        {account.AccountType === "Bank" ? account.CurrentBalance : account.CurrentBalance})
                       </SelectItem>
                     ))}
                   </SelectContent>
