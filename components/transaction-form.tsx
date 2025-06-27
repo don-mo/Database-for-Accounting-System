@@ -24,7 +24,7 @@ interface TransactionFormProps {
   onTransactionComplete: () => void
 }
 
-export function TransactionForm({ accounts, onTransactionComplete }: TransactionFormProps) {
+export function TransactionForm({ accounts = [], onTransactionComplete }: TransactionFormProps) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     fromAccountId: "",
@@ -114,12 +114,14 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
                     <SelectValue placeholder="Select source account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {accounts.map((account) => (
-                      <SelectItem key={account.AccountID} value={account.AccountID.toString()}>
-                        {account.Name} ($
-                        {account.AccountType === "Bank" ? account.CurrentBalance : account.RemainingAmount})
-                      </SelectItem>
-                    ))}
+                    {accounts
+                      .filter((a) => a && a.AccountID != null)
+                      .map((account) => (
+                        <SelectItem key={account.AccountID} value={String(account.AccountID)}>
+                          {account.Name} ($
+                          {account.AccountType === "Bank" ? account.CurrentBalance : account.RemainingAmount})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -133,12 +135,14 @@ export function TransactionForm({ accounts, onTransactionComplete }: Transaction
                     <SelectValue placeholder="Select destination account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {accounts.map((account) => (
-                      <SelectItem key={account.AccountID} value={account.AccountID.toString()}>
-                        {account.Name} ($
-                        {account.AccountType === "Bank" ? account.CurrentBalance : account.RemainingAmount})
-                      </SelectItem>
-                    ))}
+                    {accounts
+                      .filter((a) => a && a.AccountID != null)
+                      .map((account) => (
+                        <SelectItem key={account.AccountID} value={String(account.AccountID)}>
+                          {account.Name} ($
+                          {account.AccountType === "Bank" ? account.CurrentBalance : account.RemainingAmount})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
