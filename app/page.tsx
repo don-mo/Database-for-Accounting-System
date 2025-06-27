@@ -4,17 +4,19 @@ import { useState, useEffect } from "react"
 import { TransactionForm } from "@/components/transaction-form"
 import { FinancialSummary } from "@/components/financial-summary"
 import { TransactionHistory } from "@/components/transaction-history"
+import { AccountManagement } from "@/components/account-management"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { GraduationCap, Users, Code } from "lucide-react"
 
 export default function Home() {
-  const [accounts, setAccounts] = useState([])
-  const [transactions, setTransactions] = useState([])
-  const [summary, setSummary] = useState({
+  const blankSummary = {
     categoryTotals: [],
     accountBalances: [],
     totals: { assets: 0, liabilities: 0, equity: 0, balanceCheck: 0 },
-  })
+  }
+  const [summary, setSummary] = useState(blankSummary)
+  const [accounts, setAccounts] = useState([])
+  const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
 
   const fetchData = async () => {
@@ -54,6 +56,14 @@ export default function Home() {
     )
   }
 
+  if (!summary || !summary.totals) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading&hellip;</p>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Header */}
@@ -87,7 +97,7 @@ export default function Home() {
             </CardTitle>
             <CardDescription className="text-blue-100">
               Simple financial management for student organizations - no accounting degree required! Track your funds,
-              budgets, and expenses with ease.
+              budgets, expenses, and debts with ease.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -95,6 +105,11 @@ export default function Home() {
         {/* Financial Summary */}
         <div className="mb-8">
           <FinancialSummary accounts={summary.accountBalances} totals={summary.totals} />
+        </div>
+
+        {/* Account Management */}
+        <div className="mb-8">
+          <AccountManagement accounts={accounts} onAccountChange={fetchData} />
         </div>
 
         {/* Main Content Grid */}
@@ -106,7 +121,7 @@ export default function Home() {
 
           {/* Transaction History */}
           <div>
-            <TransactionHistory transactions={transactions} />
+            <TransactionHistory transactions={transactions} onTransactionChange={fetchData} />
           </div>
         </div>
 
@@ -130,7 +145,7 @@ export default function Home() {
               </div>
               <div className="text-center p-4 bg-green-100 rounded-lg">
                 <div className="text-2xl font-bold text-green-700">${summary.totals.equity.toFixed(2)}</div>
-                <div className="text-sm text-green-600">Equity (Net worth)</div>
+                <div className="text-sm text-green-600">Equity (Assets - Liabilities)</div>
               </div>
             </div>
             <div className="mt-4 text-center">

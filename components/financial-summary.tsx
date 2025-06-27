@@ -1,8 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Wallet, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
+import { Wallet, TrendingUp, DollarSign, CreditCard } from "lucide-react"
 
 interface Account {
   Name: string
@@ -27,11 +26,14 @@ export function FinancialSummary({ accounts, totals }: FinancialSummaryProps) {
   const bankAccounts = accounts.filter((a) => a.AccountType === "Bank")
   const fundAccounts = accounts.filter((a) => a.AccountType === "Fund")
   const expenseAccounts = accounts.filter((a) => a.AccountType === "Expense")
+  const debtAccounts = accounts.filter((a) => a.AccountType === "Debt")
 
   const totalCash = bankAccounts.reduce((sum, acc) => sum + acc.CurrentBalance, 0)
   const totalFunds = fundAccounts.reduce((sum, acc) => sum + acc.RemainingAmount, 0)
-  const totalBudgeted = expenseAccounts.reduce((sum, acc) => sum + acc.BudgetedAmount, 0)
-  const totalSpent = expenseAccounts.reduce((sum, acc) => sum + acc.RemainingAmount, 0)
+  const totalDebts = debtAccounts.reduce((sum, acc) => sum + acc.CurrentBalance, 0)
+
+  // Replace direct property reads with optional chaining
+  const { assets = 0, liabilities = 0, equity = 0, balanceCheck = 0 } = totals ?? {}
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -59,17 +61,15 @@ export function FinancialSummary({ accounts, totals }: FinancialSummaryProps) {
         </CardContent>
       </Card>
 
-      {/* Budget Status */}
-      <Card className="border-l-4 border-l-purple-500">
+      {/* Total Debts */}
+      <Card className="border-l-4 border-l-red-500">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Budget Used</CardTitle>
-          <TrendingDown className="h-4 w-4 text-purple-600" />
+          <CardTitle className="text-sm font-medium">Total Debts</CardTitle>
+          <CreditCard className="h-4 w-4 text-red-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-purple-700">
-            ${totalSpent.toFixed(2)} / ${totalBudgeted.toFixed(2)}
-          </div>
-          <Progress value={totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0} className="mt-2" />
+          <div className="text-2xl font-bold text-red-700">${totalDebts.toFixed(2)}</div>
+          <p className="text-xs text-muted-foreground">Money owed to people</p>
         </CardContent>
       </Card>
 
@@ -80,7 +80,7 @@ export function FinancialSummary({ accounts, totals }: FinancialSummaryProps) {
           <DollarSign className="h-4 w-4 text-indigo-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-indigo-700">${(totals.assets - totals.liabilities).toFixed(2)}</div>
+          <div className="text-2xl font-bold text-indigo-700">${equity.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">Assets minus liabilities</p>
         </CardContent>
       </Card>
@@ -92,7 +92,7 @@ export function FinancialSummary({ accounts, totals }: FinancialSummaryProps) {
           <CardDescription>Current status of all your accounts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             {/* Bank Accounts */}
             <div>
               <h4 className="font-semibold text-blue-700 mb-2">💰 Bank Accounts</h4>
@@ -131,10 +131,19 @@ export function FinancialSummary({ accounts, totals }: FinancialSummaryProps) {
                         ${account.RemainingAmount.toFixed(2)} / ${account.BudgetedAmount.toFixed(2)}
                       </span>
                     </div>
-                    <Progress
-                      value={account.BudgetedAmount > 0 ? (account.RemainingAmount / account.BudgetedAmount) * 100 : 0}
-                      className="mt-1 h-2"
-                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Debt Accounts */}
+            <div>
+              <h4 className="font-semibold text-red-700 mb-2">💳 Debts</h4>
+              <div className="space-y-2">
+                {debtAccounts.map((account, index) => (
+                  <div key={index} className="flex justify-between items-center p-2 bg-red-50 rounded">
+                    <span className="text-sm">{account.Name}</span>
+                    <span className="font-medium text-red-700">${account.CurrentBalance.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
